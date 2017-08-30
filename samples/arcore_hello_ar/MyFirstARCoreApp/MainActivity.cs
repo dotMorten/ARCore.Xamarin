@@ -13,6 +13,8 @@ using Android.Support.Design.Widget;
 using System.Collections.Generic;
 using Java.Util;
 using System.Collections.Concurrent;
+using Android.Content.PM;
+using Android.Runtime;
 
 namespace MyFirstARCoreApp
 {
@@ -42,7 +44,6 @@ namespace MyFirstARCoreApp
         // Tap handling and UI.
         ConcurrentQueue<MotionEvent> mQueuedSingleTaps = new ConcurrentQueue<MotionEvent>();
 
-        //private Queue<MotionEvent> mQueuedSingleTaps = new Queue<MotionEvent>(16);
         private List<PlaneAttachment> mTouches = new List<PlaneAttachment>();
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -84,14 +85,6 @@ namespace MyFirstARCoreApp
             mSurfaceView.SetEGLConfigChooser(8, 8, 8, 8, 16, 0); // Alpha used for plane blending.
             mSurfaceView.SetRenderer(this);
             mSurfaceView.RenderMode = Rendermode.Continuously;
-
-        }
-        public bool onSingleTap(MotionEvent e)
-        {
-            // Queue tap if there is space. Tap is lost if queue is full.
-            if (mQueuedSingleTaps.Count < 16)
-                mQueuedSingleTaps.Enqueue(e);
-            return true;
         }
 
         protected override void OnResume()
@@ -110,6 +103,49 @@ namespace MyFirstARCoreApp
             {
                 CameraPermissionHelper.RequestCameraPermission(this);
             }
+        }
+
+        protected override void OnPause()
+        {
+            base.OnPause();
+            // Note that the order matters - GLSurfaceView is paused first so that it does not try
+            // to query the session. If Session is paused before GLSurfaceView, GLSurfaceView may
+            // still call mSession.update() and get a SessionPausedException.
+            mSurfaceView.OnPause();
+            mSession.Pause();
+        }
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        {
+            if (!CameraPermissionHelper.HasCameraPermission(this))
+            {
+                Toast.MakeText(this,
+                    "Camera permission is needed to run this application", ToastLength.Long).Show();
+                Finish();
+            }
+        }
+        public override void OnWindowFocusChanged(bool hasFocus)
+        {
+            base.OnWindowFocusChanged(hasFocus);
+            if (hasFocus)
+            {
+                // Standard Android full-screen functionality.
+                // Window.DecorView.SetOnSystemUiVisibilityChangeListener(
+                //     View.SystemUiFlagLayoutStable
+                //         | View.SystemUiFlagLayoutHideNavigation
+                //         | View.SystemUiFlagLayoutFullscreen
+                //         | View.SystemUiFlagHideNavigation
+                //         | View.SystemUiFlagFullscreen
+                //         | View.SystemUiFlagImmersiveSticky);
+                Window.AddFlags(WindowManagerFlags.KeepScreenOn);
+            }
+        }
+
+        public void onSingleTap(MotionEvent e)
+        {
+            // Queue tap if there is space. Tap is lost if queue is full.
+            if (mQueuedSingleTaps.Count < 16)
+                mQueuedSingleTaps.Enqueue(e);
         }
 
         public void OnSurfaceCreated(IGL10 gl, Javax.Microedition.Khronos.Egl.EGLConfig config)

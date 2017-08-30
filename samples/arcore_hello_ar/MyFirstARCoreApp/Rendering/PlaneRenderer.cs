@@ -257,12 +257,13 @@ namespace MyFirstARCoreApp
 
         class SortablePlane
         {
-            public float mDistance;
-            public Plane mPlane;
+			public float Distance { get; private set; }
+			public Plane Plane { get; private set; }
+
             public SortablePlane(float distance, Plane plane)
             {
-                this.mDistance = distance;
-                this.mPlane = plane;
+				Distance = distance;
+				Plane = plane;
             }
         }
 
@@ -304,8 +305,8 @@ namespace MyFirstARCoreApp
                 }
                 sortedPlanes.Add(new SortablePlane(distance, plane));
             }
-            sortedPlanes.Sort((a, b) => { return a.mDistance.CompareTo(b.mDistance); });
 
+			sortedPlanes.Sort((x, y) => x.Distance.CompareTo(y.Distance));
 
 
             float[] cameraView = new float[16];
@@ -346,7 +347,7 @@ namespace MyFirstARCoreApp
 
             foreach (SortablePlane sortedPlane in sortedPlanes)
             {
-                Plane plane = sortedPlane.mPlane;
+				var plane = sortedPlane.Plane;
                 float[] planeMatrix = new float[16];
                 plane.CenterPose.ToMatrix(planeMatrix, 0);
 
@@ -399,10 +400,10 @@ namespace MyFirstARCoreApp
         }
 
         private static uint[] PLANE_COLORS_RGBA = {
-            0xFFFFFFFF,
-            0xF44336FF,
-            0xE91E63FF,
-            0x9C27B0FF,
+            // 0xFFFFFFFF,
+            // 0xF44336FF,
+            // 0xE91E63FF,
+            // 0x9C27B0FF,
             0x673AB7FF,
             0x3F51B5FF,
             0x2196F3FF,
@@ -410,11 +411,11 @@ namespace MyFirstARCoreApp
             0x00BCD4FF,
             0x009688FF,
             0x4CAF50FF,
-            0x8BC34AFF,
-            0xCDDC39FF,
-            0xFFEB3BFF,
-            0xFFC107FF,
-            0xFF9800FF,
+            // 0x8BC34AFF,
+            // 0xCDDC39FF,
+            // 0xFFEB3BFF,
+            // 0xFFC107FF,
+            // 0xFF9800FF,
         };
     }
 }
