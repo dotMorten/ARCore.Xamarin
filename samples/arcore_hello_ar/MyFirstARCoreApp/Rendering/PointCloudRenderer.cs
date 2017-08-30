@@ -9,7 +9,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Com.Google.AR.Core;
+using Google.AR.Core;
 using Android.Opengl;
 
 namespace MyFirstARCoreApp

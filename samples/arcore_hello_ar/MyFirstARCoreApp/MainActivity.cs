@@ -3,11 +3,10 @@ using Android.App;
 using Android.Widget;
 using Android.OS;
 using Android.Opengl;
-using Com.Google.AR.Core;
+using Google.AR.Core;
 using Javax.Microedition.Khronos.Egl;
 using Javax.Microedition.Khronos.Opengles;
 using Android.Views;
-using static Com.Google.AR.Core.Frame;
 using Android.Util;
 using Android.Support.Design.Widget;
 using System.Collections.Generic;
@@ -25,7 +24,7 @@ namespace MyFirstARCoreApp
         // Rendering. The Renderers are created here, and initialized when the GL surface is created.
         private GLSurfaceView mSurfaceView;
 
-        private Com.Google.AR.Core.Config mDefaultConfig;
+        private Google.AR.Core.Config mDefaultConfig;
         private Session mSession;
 
 
@@ -58,7 +57,7 @@ namespace MyFirstARCoreApp
             mSession = new Session(this);
 
             // Create default config, check is supported, create session from that config.
-            mDefaultConfig = Com.Google.AR.Core.Config.CreateDefaultConfig();
+            mDefaultConfig = Google.AR.Core.Config.CreateDefaultConfig();
             if (!mSession.IsSupported(mDefaultConfig))
             {
                 Toast.MakeText(this, "This device does not support AR", ToastLength.Long).Show();
@@ -130,18 +129,18 @@ namespace MyFirstARCoreApp
             if (hasFocus)
             {
                 // Standard Android full-screen functionality.
-                // Window.DecorView.SetOnSystemUiVisibilityChangeListener(
-                //     View.SystemUiFlagLayoutStable
-                //         | View.SystemUiFlagLayoutHideNavigation
-                //         | View.SystemUiFlagLayoutFullscreen
-                //         | View.SystemUiFlagHideNavigation
-                //         | View.SystemUiFlagFullscreen
-                //         | View.SystemUiFlagImmersiveSticky);
+				//Window.DecorView.SystemUiVisibility = Android.Views.SystemUiFlags.LayoutStable
+				//| Android.Views.SystemUiFlags.LayoutHideNavigation
+				//| Android.Views.SystemUiFlags.LayoutFullscreen
+				//| Android.Views.SystemUiFlags.HideNavigation
+				//| Android.Views.SystemUiFlags.Fullscreen
+				//| Android.Views.SystemUiFlags.ImmersiveSticky;
+
                 Window.AddFlags(WindowManagerFlags.KeepScreenOn);
             }
         }
 
-        public void onSingleTap(MotionEvent e)
+		private void onSingleTap(MotionEvent e)
         {
             // Queue tap if there is space. Tap is lost if queue is full.
             if (mQueuedSingleTaps.Count < 16)
@@ -207,7 +206,7 @@ namespace MyFirstARCoreApp
                 // compared to frame rate.
                 MotionEvent tap = null;
                 mQueuedSingleTaps.TryDequeue(out tap);
-                if (tap != null && frame.GetTrackingState() == TrackingState.Tracking)
+                if (tap != null && frame.GetTrackingState() == Frame.TrackingState.Tracking)
                 {
                     foreach (HitResult hit in frame.HitTest(tap))
                     {
@@ -239,7 +238,7 @@ namespace MyFirstARCoreApp
                 mBackgroundRenderer.Draw(frame);
 
                 // If not tracking, don't draw 3d objects.
-                if (frame.GetTrackingState() == TrackingState.NotTracking)
+                if (frame.GetTrackingState() == Frame.TrackingState.NotTracking)
                 {
                     return;
                 }
@@ -264,7 +263,7 @@ namespace MyFirstARCoreApp
                 {
                     foreach (Plane plane in mSession.AllPlanes)
                     {
-                        if (plane.GetType() == Com.Google.AR.Core.Plane.Type.HorizontalUpwardFacing &&
+                        if (plane.GetType() == Plane.Type.HorizontalUpwardFacing &&
                                 plane.GetTrackingState() == Plane.TrackingState.Tracking)
                         {
                             HideLoadingMessage();
@@ -280,7 +279,7 @@ namespace MyFirstARCoreApp
                 float scaleFactor = 1.0f;
                 foreach (PlaneAttachment planeAttachment in mTouches)
                 {
-                    if (!planeAttachment.IsTracking())
+                    if (!planeAttachment.IsTracking)
                     {
                         continue;
                     }

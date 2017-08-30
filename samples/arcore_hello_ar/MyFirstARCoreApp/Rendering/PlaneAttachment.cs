@@ -9,37 +9,39 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Com.Google.AR.Core;
+using Google.AR.Core;
 
 namespace MyFirstARCoreApp
 {
     internal class PlaneAttachment
     {
         private readonly Plane mPlane;
-        private readonly Anchor mAnchor;
 
         // Allocate temporary storage to avoid multiple allocations per frame.
-        private readonly float[] mPoseTranslation = new float[3];
-        private readonly float[] mPoseRotation = new float[4];
+        private float[] mPoseTranslation = new float[3];
+        private float[] mPoseRotation = new float[4];
 
         public PlaneAttachment(Plane plane, Anchor anchor)
         {
             mPlane = plane;
-            mAnchor = anchor;
+            Anchor = anchor;
         }
 
-        public bool IsTracking()
+        public bool IsTracking
         {
-            return /*true if*/
-                mPlane.GetTrackingState() == Plane.TrackingState.Tracking &&
-                mAnchor.GetTrackingState() == Com.Google.AR.Core.Anchor.TrackingState.Tracking;
+            get
+            {
+                return /*true if*/
+                    mPlane.GetTrackingState() == Plane.TrackingState.Tracking &&
+                    Anchor.GetTrackingState() == Anchor.TrackingState.Tracking;
+            }
         }
 
         public Pose Pose
         {
             get
             {
-                Pose pose = mAnchor.Pose;
+                Pose pose = Anchor.Pose;
                 pose.GetTranslation(mPoseTranslation, 0);
                 pose.GetRotationQuaternion(mPoseRotation, 0);
                 mPoseTranslation[1] = mPlane.CenterPose.Ty();
@@ -47,6 +49,6 @@ namespace MyFirstARCoreApp
             }
         }
 
-        public Anchor Anchor => mAnchor;
+        public Anchor Anchor { get; }
     }
 }

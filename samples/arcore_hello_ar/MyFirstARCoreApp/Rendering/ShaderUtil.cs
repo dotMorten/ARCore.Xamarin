@@ -15,7 +15,7 @@ using Android.Util;
 
 namespace MyFirstARCoreApp
 {
-    internal class ShaderUtil
+    internal static class ShaderUtil
     {
         /// <summary>
         /// Converts a raw text file, saved as a resource, into an OpenGL ES shader.
@@ -76,24 +76,15 @@ namespace MyFirstARCoreApp
         /// <returns>The context of the text file, or null in case of error.</returns>
         private static string ReadRawTextFile(Context context, int resId)
         {
-            System.IO.Stream inputStream = context.Resources.OpenRawResource(resId);
-            try
+            string result = null;
+
+            using (var rs = context.Resources.OpenRawResource(resId))
+            using (var sr = new System.IO.StreamReader(rs))
             {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                StringBuilder sb = new StringBuilder();
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    sb.Append(line).Append("\n");
-                }
-                reader.Close();
-                return sb.ToString();
+                result = sr.ReadToEnd();
             }
-            catch (IOException e)
-            {
-                e.PrintStackTrace();
-            }
-            return null;
+
+            return result;
         }
     }
 }

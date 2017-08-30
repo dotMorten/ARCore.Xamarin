@@ -11,7 +11,7 @@ using Android.Views;
 using Android.Widget;
 using Java.Nio;
 using Android.Opengl;
-using Com.Google.AR.Core;
+using Google.AR.Core;
 
 namespace MyFirstARCoreApp
 {
@@ -31,10 +31,14 @@ namespace MyFirstARCoreApp
 
         private int mQuadPositionParam;
         private int mQuadTexCoordParam;
-        private int mTextureId = -1;
         private int mTextureTarget = GLES11Ext.GlTextureExternalOes;
 
-        public int TextureId => mTextureId;
+		public BackgroundRenderer()
+		{
+		}
+
+		public int TextureId { get; private set; } = -1;
+
 
         /// <summary>
         /// Allocates and initializes OpenGL resources needed by the background renderer.  Must be
@@ -46,8 +50,8 @@ namespace MyFirstARCoreApp
             // Generate the background texture.
             int[] textures = new int[1];
             GLES20.GlGenTextures(1, textures, 0);
-            mTextureId = textures[0];
-            GLES20.GlBindTexture(mTextureTarget, mTextureId);
+            TextureId = textures[0];
+            GLES20.GlBindTexture(mTextureTarget, TextureId);
             GLES20.GlTexParameteri(mTextureTarget, GLES20.GlTextureWrapS, GLES20.GlClampToEdge);
             GLES20.GlTexParameteri(mTextureTarget, GLES20.GlTextureWrapT, GLES20.GlClampToEdge);
             GLES20.GlTexParameteri(mTextureTarget, GLES20.GlTextureMinFilter, GLES20.GlNearest);
@@ -117,7 +121,7 @@ namespace MyFirstARCoreApp
             GLES20.GlDisable(GLES20.GlDepthTest);
             GLES20.GlDepthMask(false);
 
-            GLES20.GlBindTexture(GLES11Ext.GlTextureExternalOes, mTextureId);
+			GLES20.GlBindTexture(GLES11Ext.GlTextureExternalOes, TextureId);
 
             GLES20.GlUseProgram(mQuadProgram);
 
@@ -146,14 +150,14 @@ namespace MyFirstARCoreApp
             ShaderUtil.CheckGLError(TAG, "Draw");
         }
 
-        public static readonly float[] QUAD_COORDS = new float[]{
+		static readonly float[] QUAD_COORDS = new float[]{
             -1.0f, -1.0f, 0.0f,
             -1.0f, +1.0f, 0.0f,
             +1.0f, -1.0f, 0.0f,
             +1.0f, +1.0f, 0.0f,
         };
     
-        public static readonly float[] QUAD_TEXCOORDS = new float[]{
+		static readonly float[] QUAD_TEXCOORDS = new float[]{
             0.0f, 1.0f,
             0.0f, 0.0f,
             1.0f, 1.0f,

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Com.Google.AR.Core;
+using Google.AR.Core;
 using Java.IO;
 using Java.Nio;
 using Java.Util;
@@ -27,24 +27,24 @@ namespace MyFirstARCoreApp
         private const int INDICES_PER_BOUNDARY_VERT = 3;
         private const int INITIAL_BUFFER_BOUNDARY_VERTS = 64;
 
-        private static int INITIAL_VERTEX_BUFFER_SIZE_BYTES =
+		const int INITIAL_VERTEX_BUFFER_SIZE_BYTES =
             BYTES_PER_FLOAT * COORDS_PER_VERTEX * VERTS_PER_BOUNDARY_VERT *
                 INITIAL_BUFFER_BOUNDARY_VERTS;
 
-        private static int INITIAL_INDEX_BUFFER_SIZE_BYTES =
+		const int INITIAL_INDEX_BUFFER_SIZE_BYTES =
             BYTES_PER_SHORT * INDICES_PER_BOUNDARY_VERT * INDICES_PER_BOUNDARY_VERT *
                 INITIAL_BUFFER_BOUNDARY_VERTS;
 
-        private static float FADE_RADIUS_M = 0.25f;
-        private static float DOTS_PER_METER = 10.0f;
-        private static float EQUILATERAL_TRIANGLE_SCALE = (float)(1 / Math.Sqrt(3));
+		const float FADE_RADIUS_M = 0.25f;
+		const float DOTS_PER_METER = 10.0f;
+		static readonly float EQUILATERAL_TRIANGLE_SCALE = (float)(1 / Math.Sqrt(3));
 
         // Using the "signed distance field" approach to render sharp lines and circles.
         // {dotThreshold, lineThreshold, lineFadeSpeed, occlusionScale}
         // dotThreshold/lineThreshold: red/green intensity above which dots/lines are present
         // lineFadeShrink:  lines will fade in between alpha = 1-(1/lineFadeShrink) and 1.0
         // occlusionShrink: occluded planes will fade out between alpha = 0 and 1/occlusionShrink
-        private static float[] GRID_CONTROL = { 0.2f, 0.4f, 2.0f, 1.5f };
+		static readonly float[] GRID_CONTROL = { 0.2f, 0.4f, 2.0f, 1.5f };
 
         private int mPlaneProgram;
         private int[] mTextures = new int[1];
@@ -100,7 +100,7 @@ namespace MyFirstARCoreApp
             ShaderUtil.CheckGLError(TAG, "Program creation");
 
             // Read the texture.
-            Bitmap textureBitmap = BitmapFactory.DecodeStream(
+			var textureBitmap = Android.Graphics.BitmapFactory.DecodeStream(
                 context.Assets.Open(gridDistanceTextureName));
 
             GLES20.GlActiveTexture(GLES20.GlTexture0);
@@ -142,7 +142,7 @@ namespace MyFirstARCoreApp
         private void UpdatePlaneParameters(float[] planeMatrix, float extentX, float extentZ,
             FloatBuffer boundary)
         {
-            Java.Lang.JavaSystem.Arraycopy(planeMatrix, 0, mModelMatrix, 0, 16);
+			Array.Copy(planeMatrix, 0, mModelMatrix, 0, 16);
             if (boundary == null)
             {
                 mVertexBuffer.Limit(0);
@@ -287,7 +287,7 @@ namespace MyFirstARCoreApp
             float cameraZ = cameraPose.Tz();
             foreach (Plane plane in allPlanes)
             {
-                if (plane.GetType() != Com.Google.AR.Core.Plane.Type.HorizontalUpwardFacing ||
+                if (plane.GetType() != Plane.Type.HorizontalUpwardFacing ||
                         plane.GetTrackingState() != Plane.TrackingState.Tracking)
                 {
                     continue;
@@ -356,11 +356,13 @@ namespace MyFirstARCoreApp
 
 
                 // Get plane index. Keep a map to assign same indices to same planes.
-                if (!mPlaneIndexMap.ContainsKey(plane))
+
+				int planeIndex = -1;
+				if (!mPlaneIndexMap.TryGetValue(plane, out planeIndex))
                 {
-                    mPlaneIndexMap[plane] = mPlaneIndexMap.Count;
+					planeIndex = Java.Lang.Integer.ValueOf(mPlaneIndexMap.Count).IntValue();
+					mPlaneIndexMap.Add(plane, planeIndex);
                 }
-                int planeIndex = mPlaneIndexMap[plane];
 
                 // Set plane color. Computed deterministically from the Plane index.
                 int colorIndex = planeIndex % PLANE_COLORS_RGBA.Length;

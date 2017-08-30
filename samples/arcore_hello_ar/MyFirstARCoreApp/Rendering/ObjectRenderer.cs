@@ -342,7 +342,7 @@ namespace MyFirstARCoreApp
             ShaderUtil.CheckGLError(TAG, "After draw");
         }
 
-        public static void NormalizeVec3(float[] v)
+        private static void NormalizeVec3(float[] v)
         {
             float reciprocalLength = 1.0f / (float)Math.Sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
             v[0] *= reciprocalLength;
