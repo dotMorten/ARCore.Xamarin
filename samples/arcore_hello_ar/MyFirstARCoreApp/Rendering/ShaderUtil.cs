@@ -15,14 +15,16 @@ using Android.Util;
 
 namespace MyFirstARCoreApp
 {
-    class ShaderUtil
-    { /**
-     * Converts a raw text file, saved as a resource, into an OpenGL ES shader.
-     *
-     * @param type The type of shader we will be creating.
-     * @param resId The resource ID of the raw text file about to be turned into a shader.
-     * @return The shader object handler.
-     */
+    internal class ShaderUtil
+    {
+        /// <summary>
+        /// Converts a raw text file, saved as a resource, into an OpenGL ES shader.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="context"></param>
+        /// <param name="type">The type of shader we will be creating.</param>
+        /// <param name="resId">The resource ID of the raw text file about to be turned into a shader.</param>
+        /// <returns>The shader object handler.</returns>
         public static int LoadGLShader(string tag, Context context, int type, int resId)
         {
             string code = ReadRawTextFile(context, resId);
@@ -50,12 +52,12 @@ namespace MyFirstARCoreApp
             return shader;
         }
 
-        /**
-         * Checks if we've had an error inside of OpenGL ES, and if so what that error is.
-         *
-         * @param label Label to report in case of error.
-         * @throws RuntimeException If an OpenGL error is detected.
-         */
+        /// <summary>
+        /// Checks if we've had an error inside of OpenGL ES, and if so what that error is.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="label"> Label to report in case of error.</param>
+        /// <exception cref="RuntimeException">If an OpenGL error is detected</exception>
         public static void CheckGLError(string tag, string label)
         {
             int error;
@@ -66,12 +68,12 @@ namespace MyFirstARCoreApp
             }
         }
 
-        /**
-         * Converts a raw text file into a string.
-         *
-         * @param resId The resource ID of the raw text file about to be turned into a shader.
-         * @return The context of the text file, or null in case of error.
-         */
+        /// <summary>
+        /// Converts a raw text file into a string.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="resId">The resource ID of the raw text file about to be turned into a shader.</param>
+        /// <returns>The context of the text file, or null in case of error.</returns>
         private static string ReadRawTextFile(Context context, int resId)
         {
             System.IO.Stream inputStream = context.Resources.OpenRawResource(resId);

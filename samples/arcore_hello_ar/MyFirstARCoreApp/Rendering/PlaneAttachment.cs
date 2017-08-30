@@ -13,7 +13,7 @@ using Com.Google.AR.Core;
 
 namespace MyFirstARCoreApp
 {
-    class PlaneAttachment
+    internal class PlaneAttachment
     {
         private readonly Plane mPlane;
         private readonly Anchor mAnchor;

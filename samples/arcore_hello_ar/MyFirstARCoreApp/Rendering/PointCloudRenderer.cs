@@ -42,13 +42,11 @@ namespace MyFirstARCoreApp
         {
         }
 
-        /**
-         * Allocates and initializes OpenGL resources needed by the plane renderer.  Must be
-         * called on the OpenGL thread, typically in
-         * {@link GLSurfaceView.Renderer#onSurfaceCreated(GL10, EGLConfig)}.
-         *
-         * @param context Needed to access shader source.
-         */
+        /// <summary>
+        /// Allocates and initializes OpenGL resources needed by the plane renderer.Must be 
+        /// called on the OpenGL thread, typically in <see cref="GLSurfaceView.IRenderer.OnSurfaceCreated(Javax.Microedition.Khronos.Opengles.IGL10, Javax.Microedition.Khronos.Egl.EGLConfig)"/>.
+        /// </summary>
+        /// <param name="context">Needed to access shader source.</param>
         public void CreateOnGlThread(Context context)
         {
             ShaderUtil.CheckGLError(TAG, "before create");
@@ -86,10 +84,11 @@ namespace MyFirstARCoreApp
             ShaderUtil.CheckGLError(TAG, "program  params");
         }
 
-        /**
-         * Updates the OpenGL buffer contents to the provided point.  Repeated calls with the same
-         * point cloud will be ignored.
-         */
+        /// <summary>
+        /// Updates the OpenGL buffer contents to the provided point.  Repeated calls with the same
+        /// point cloud will be ignored.
+        /// </summary>
+        /// <param name="cloud"></param>
         public void Update(PointCloud cloud)
         {
             if (mLastPointCloud == cloud)
@@ -120,15 +119,12 @@ namespace MyFirstARCoreApp
             ShaderUtil.CheckGLError(TAG, "after update");
         }
 
-        /**
-         * Renders the point cloud.
-         *
-         * @param pose the current point cloud pose, from {@link Frame#getPointCloudPose()}.
-         * @param cameraView the camera view matrix for this frame, typically from
-         *     {@link Frame#getViewMatrix(float[], int)}.
-         * @param cameraPerspective the camera projection matrix for this frame, typically from
-         *     {@link Session#getProjectionMatrix(float[], int, float, float)}.
-         */
+        /// <summary>
+        /// Renders the point cloud.
+        /// </summary>
+        /// <param name="pose">the current point cloud pose, from {@link Frame#getPointCloudPose()}.</param>
+        /// <param name="cameraView">the camera view matrix for this frame, typically from <see cref="Frame.GetViewMatrix(float[], int)/>.</param>
+        /// <param name="cameraPerspective">the camera projection matrix for this frame, typically from <see cref="Session.GetProjectionMatrix(float[], int, float, float)"/>.</param>
         public void Draw(Pose pose, float[] cameraView, float[] cameraPerspective)
         {
             float[] modelMatrix = new float[16];
@@ -158,3 +154,4 @@ namespace MyFirstARCoreApp
         }
     }
 }
+ 

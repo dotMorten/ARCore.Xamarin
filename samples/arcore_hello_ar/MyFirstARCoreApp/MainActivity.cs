@@ -118,7 +118,7 @@ namespace MyFirstARCoreApp
 
             // Create the texture and pass it to ARCore session to be filled during update().
             mBackgroundRenderer.CreateOnGlThread(/*context=*/this);
-            mSession.SetCameraTextureName(mBackgroundRenderer.getTextureId());
+            mSession.SetCameraTextureName(mBackgroundRenderer.TextureId);
 
             // Prepare the other rendering objects.
             try
@@ -128,7 +128,7 @@ namespace MyFirstARCoreApp
 
                 mVirtualObjectShadow.CreateOnGlThread(/*context=*/this,
                     "andy_shadow.obj", "andy_shadow.png");
-                mVirtualObjectShadow.SetBlendMode(ObjectRenderer.BlendMode.Shadow);
+                mVirtualObjectShadow.BlendMode = BlendMode.Shadow;
                 mVirtualObjectShadow.SetMaterialProperties(1.0f, 0.0f, 0.0f, 1.0f);
             }
             catch (Java.IO.IOException e)
@@ -294,7 +294,7 @@ namespace MyFirstARCoreApp
         }
     }
 
-    class SimpleTapGestureDetector : GestureDetector.SimpleOnGestureListener
+    internal class SimpleTapGestureDetector : GestureDetector.SimpleOnGestureListener
     {
         public Func<MotionEvent, bool> SingleTapUpHandler { get; set; }
 

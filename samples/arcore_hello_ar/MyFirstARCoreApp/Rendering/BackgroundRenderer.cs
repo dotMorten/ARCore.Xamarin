@@ -15,7 +15,7 @@ using Com.Google.AR.Core;
 
 namespace MyFirstARCoreApp
 {
-    class BackgroundRenderer
+    internal class BackgroundRenderer
     {
         private static readonly String TAG = typeof(BackgroundRenderer).FullName;
 
@@ -34,16 +34,13 @@ namespace MyFirstARCoreApp
         private int mTextureId = -1;
         private int mTextureTarget = GLES11Ext.GlTextureExternalOes;
 
-
         public int TextureId => mTextureId;
 
-        /**
-         * Allocates and initializes OpenGL resources needed by the background renderer.  Must be
-         * called on the OpenGL thread, typically in
-         * {@link GLSurfaceView.Renderer#onSurfaceCreated(GL10, EGLConfig)}.
-         *
-         * @param context Needed to access shader source.
-         */
+        /// <summary>
+        /// Allocates and initializes OpenGL resources needed by the background renderer.  Must be
+        /// called on the OpenGL thread, typically in <see cref="GLSurfaceView.IRenderer.OnSurfaceCreated(Javax.Microedition.Khronos.Opengles.IGL10, Javax.Microedition.Khronos.Egl.EGLConfig)"/>.
+        /// </summary>
+        /// <param name="context">Needed to access shader source.</param>
         public void CreateOnGlThread(Context context)
         {
             // Generate the background texture.
@@ -99,14 +96,13 @@ namespace MyFirstARCoreApp
             ShaderUtil.CheckGLError(TAG, "Program parameters");
         }
 
-        /**
-         * Draws the AR background image.  The image will be drawn such that virtual content rendered
-         * with the matrices provided by {@link Frame#getViewMatrix(float[], int)} and
-         * {@link Session#getProjectionMatrix(float[], int, float, float)} will accurately follow
-         * static physical objects.  This must be called <b>before</b> drawing virtual content.
-         *
-         * @param frame The last {@code Frame} returned by {@link Session#update()}.
-         */
+        /// <summary>
+        /// Draws the AR background image.  The image will be drawn such that virtual content rendered
+        /// with the matrices provided by {@link Frame#getViewMatrix(float[], int)} and
+        /// <see cref="Session.GetProjectionMatrix(float[], int, float, float)" /> will accurately follow
+        /// static physical objects.This must be called<b> before</b> drawing virtual content.
+        /// </summary>
+        /// <param name="frame">The last frame</param>
         public void Draw(Frame frame)
         {
             // If display rotation changed (also includes view size change), we need to re-query the uv

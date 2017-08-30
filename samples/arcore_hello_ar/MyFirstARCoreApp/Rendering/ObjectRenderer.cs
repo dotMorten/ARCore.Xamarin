@@ -16,22 +16,30 @@ using DE.Javagl;
 
 namespace MyFirstARCoreApp
 {
-    class ObjectRenderer
+
+    /// <summary>
+    /// Blend mode.
+    /// </summary>
+    public enum BlendMode
+    {
+        /// <summary>
+        /// No blending (opaque rendering).
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Multiplies the destination color by the source alpha.
+        /// </summary>
+        Shadow,
+        /// <summary>
+        /// Normal alpha blending.
+        /// </summary>
+        Grid
+    };
+
+    internal class ObjectRenderer
     {
         private static readonly string TAG = typeof(ObjectRenderer).Name;
 
-        /**
-         * Blend mode.
-         *
-         * @see #setBlendMode(BlendMode)
-         */
-        public enum BlendMode
-        {
-            /** Multiplies the destination color by the source alpha. */
-            Shadow,
-            /** Normal alpha blending. */
-            Grid
-        };
 
         private static readonly int COORDS_PER_VERTEX = 3;
 
@@ -68,8 +76,6 @@ namespace MyFirstARCoreApp
         // Shader location: material properties.
         private int mMaterialParametersUniform;
 
-        private BlendMode? mBlendMode = null;
-
         // Temporary matrices allocated here to reduce number of allocations for each frame.
         private float[] mModelMatrix = new float[16];
         private float[] mModelViewMatrix = new float[16];
@@ -85,13 +91,12 @@ namespace MyFirstARCoreApp
         {
         }
 
-        /**
-         * Creates and initializes OpenGL resources needed for rendering the model.
-         *
-         * @param context Context for loading the shader and below-named model and texture assets.
-         * @param objAssetName  Name of the OBJ file containing the model geometry.
-         * @param diffuseTextureAssetName  Name of the PNG file containing the diffuse texture map.
-         */
+        /// <summary>
+        /// Creates and initializes OpenGL resources needed for rendering the model.
+        /// </summary>
+        /// <param name="context">Context for loading the shader and below-named model and texture assets.</param>
+        /// <param name="objAssetName">Name of the OBJ file containing the model geometry.</param>
+        /// <param name="diffuseTextureAssetName">Name of the PNG file containing the diffuse texture map.</param>
         public void CreateOnGlThread(Context context, string objAssetName,
                                      string diffuseTextureAssetName)
         {
@@ -206,23 +211,15 @@ namespace MyFirstARCoreApp
             Android.Opengl.Matrix.SetIdentityM(mModelMatrix, 0);
         }
 
-        /**
-         * Selects the blending mode for rendering.
-         *
-         * @param blendMode The blending mode.  Null indicates no blending (opaque rendering).
-         */
-        public void SetBlendMode(BlendMode blendMode)
-        {
-            mBlendMode = blendMode;
-        }
+        /// <summary>Gets or sets the blending mode for rendering.</summary>   
+        public BlendMode BlendMode { get; set; }
 
-        /**
-         * Updates the object model matrix and applies scaling.
-         *
-         * @param modelMatrix A 4x4 model-to-world transformation matrix, stored in column-major order.
-         * @param scaleFactor A separate scaling factor to apply before the {@code modelMatrix}.
-         * @see android.opengl.Matrix
-         */
+        /// <summary>
+        /// Updates the object model matrix and applies scaling.
+        /// </summary>
+        /// <param name="modelMatrix">A 4x4 model-to-world transformation matrix, stored in column-major order.</param>
+        /// <param name="scaleFactor">A separate scaling factor to apply before the <paramref name="modelMatrix"/>.</param>
+        /// <seealso cref="Android.Opengl.Matrix"/>
         public void UpdateModelMatrix(float[] modelMatrix, float scaleFactor)
         {
             float[] scaleMatrix = new float[16];
@@ -233,15 +230,13 @@ namespace MyFirstARCoreApp
             Android.Opengl.Matrix.MultiplyMM(mModelMatrix, 0, modelMatrix, 0, scaleMatrix, 0);
         }
 
-        /**
-         * Sets the surface characteristics of the rendered model.
-         *
-         * @param ambient  Intensity of non-directional surface illumination.
-         * @param diffuse  Diffuse (matte) surface reflectivity.
-         * @param specular  Specular (shiny) surface reflectivity.
-         * @param specularPower  Surface shininess.  Larger values result in a smaller, sharper
-         *     specular highlight.
-         */
+        /// <summary>
+        /// Sets the surface characteristics of the rendered model.
+        /// </summary>
+        /// <param name="ambient">Intensity of non-directional surface illumination.</param>
+        /// <param name="diffuse">Diffuse (matte) surface reflectivity.</param>
+        /// <param name="specular">Specular (shiny) surface reflectivity.</param>
+        /// <param name="specularPower">Surface shininess. Larger values result in a smaller, sharper specular highlight.</param>
         public void SetMaterialProperties(
                 float ambient, float diffuse, float specular, float specularPower)
         {
@@ -251,21 +246,18 @@ namespace MyFirstARCoreApp
             mSpecularPower = specularPower;
         }
 
-        /**
-         * Draws the model.
-         *
-         * @param cameraView  A 4x4 view matrix, in column-major order.
-         * @param cameraPerspective  A 4x4 projection matrix, in column-major order.
-         * @param lightIntensity  Illumination intensity.  Combined with diffuse and specular material
-         *     properties.
-         * @see #setBlendMode(BlendMode)
-         * @see #updateModelMatrix(float[], float)
-         * @see #setMaterialProperties(float, float, float, float)
-         * @see android.opengl.Matrix
-         */
+        /// <summary>
+        /// Draws the model.
+        /// </summary>
+        /// <param name="cameraView">A 4x4 view matrix, in column-major order.</param>
+        /// <param name="cameraPerspective">A 4x4 projection matrix, in column-major order.</param>
+        /// <param name="lightIntensity">Illumination intensity.  Combined with diffuse and specular material properties.</param>
+        /// <seealso cref="BlendMode"/>
+        /// <seealso cref="UpdateModelMatrix(float[], float)"/>
+        /// <seealso cref="SetMaterialProperties(float, float, float, float)"/>
+        /// <seealso cref="Android.Opengl.Matrix"/>
         public void Draw(float[] cameraView, float[] cameraPerspective, float lightIntensity)
         {
-
             ShaderUtil.CheckGLError(TAG, "Before draw");
 
             // Build the ModelView and ModelViewProjection matrices
@@ -313,11 +305,11 @@ namespace MyFirstARCoreApp
             GLES20.GlEnableVertexAttribArray(mNormalAttribute);
             GLES20.GlEnableVertexAttribArray(mTexCoordAttribute);
 
-            if (mBlendMode != null)
+            if (BlendMode != BlendMode.None)
             {
                 GLES20.GlDepthMask(false);
                 GLES20.GlEnable(GLES20.GlBlend);
-                switch (mBlendMode)
+                switch (BlendMode)
                 {
                     case BlendMode.Shadow:
                         // Multiplicative blending function for Shadow.
@@ -334,7 +326,7 @@ namespace MyFirstARCoreApp
             GLES20.GlDrawElements(GLES20.GlTriangles, mIndexCount, GLES20.GlUnsignedShort, 0);
             GLES20.GlBindBuffer(GLES20.GlElementArrayBuffer, 0);
 
-            if (mBlendMode != null)
+            if (BlendMode != BlendMode.None)
             {
                 GLES20.GlDisable(GLES20.GlBlend);
                 GLES20.GlDepthMask(true);

@@ -15,7 +15,7 @@ using Android.Graphics;
 
 namespace MyFirstARCoreApp
 {
-    class PlaneRenderer
+    internal class PlaneRenderer
     {
         private static string TAG = typeof(PlaneRenderer).Name;
 
@@ -72,19 +72,18 @@ namespace MyFirstARCoreApp
         private float[] mPlaneAngleUvMatrix = new float[4]; // 2x2 rotation matrix applied to uv coords.
 
         private Dictionary<Plane, int> mPlaneIndexMap = new Dictionary<Plane, int>();
+
         public PlaneRenderer()
         {
         }
 
-
-        /**
-   * Allocates and initializes OpenGL resources needed by the plane renderer.  Must be
-   * called on the OpenGL thread, typically in
-   * {@link GLSurfaceView.Renderer#onSurfaceCreated(GL10, EGLConfig)}.
-   *
-   * @param context Needed to access shader source and texture PNG.
-   * @param gridDistanceTextureName  Name of the PNG file containing the grid texture.
-   */
+        /// <summary>
+        /// Allocates and initializes OpenGL resources needed by the plane renderer.  Must be
+        /// called on the OpenGL thread, typically in
+        /// <see cref="GLSurfaceView.IRenderer.OnSurfaceCreated(IGL10, Javax.Microedition.Khronos.Egl.EGLConfig)"/>
+        /// </summary>
+        /// <param name="context">Needed to access shader source and texture PNG.</param>
+        /// <param name="gridDistanceTextureName">Name of the PNG file containing the grid texture.</param>
         public void CreateOnGlThread(Context context, String gridDistanceTextureName)
         {
             int vertexShader = ShaderUtil.LoadGLShader(TAG, context,
@@ -133,9 +132,13 @@ namespace MyFirstARCoreApp
             ShaderUtil.CheckGLError(TAG, "Program parameters");
         }
 
-        /**
-         * Updates the plane model transform matrix and extents.
-         */
+        /// <summary>
+        /// Updates the plane model transform matrix and extents.
+        /// </summary>
+        /// <param name="planeMatrix"></param>
+        /// <param name="extentX"></param>
+        /// <param name="extentZ"></param>
+        /// <param name="boundary"></param>
         private void UpdatePlaneParameters(float[] planeMatrix, float extentX, float extentZ,
             FloatBuffer boundary)
         {
