@@ -28,7 +28,7 @@ namespace MyFirstARCoreApp
             mAnchor = anchor;
         }
 
-        public bool isTracking()
+        public bool IsTracking()
         {
             return /*true if*/
                 mPlane.GetTrackingState() == Plane.TrackingState.Tracking &&

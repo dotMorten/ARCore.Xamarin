@@ -18,10 +18,10 @@ namespace MyFirstARCoreApp
     {
         private static readonly string TAG = typeof(PointCloudRenderer).Name;
 
-        private static readonly int BYTES_PER_FLOAT = 16 / 8;
-        private static readonly int FLOATS_PER_POINT = 4;  // X,Y,Z,confidence.
-        private static readonly int BYTES_PER_POINT = BYTES_PER_FLOAT * FLOATS_PER_POINT;
-        private static readonly int INITIAL_BUFFER_POINTS = 1000;
+        private const int BYTES_PER_FLOAT = Java.Lang.Float.Size / 8;
+        private const int FLOATS_PER_POINT = 4;  // X,Y,Z,confidence.
+        private const int BYTES_PER_POINT = BYTES_PER_FLOAT * FLOATS_PER_POINT;
+        private const int INITIAL_BUFFER_POINTS = 1000;
 
         private int mVbo;
         private int mVboSize;
@@ -49,9 +49,9 @@ namespace MyFirstARCoreApp
          *
          * @param context Needed to access shader source.
          */
-        public void createOnGlThread(Context context)
+        public void CreateOnGlThread(Context context)
         {
-            ShaderUtil.checkGLError(TAG, "before create");
+            ShaderUtil.CheckGLError(TAG, "before create");
 
             int[] buffers = new int[1];
             GLES20.GlGenBuffers(1, buffers, 0);
@@ -62,11 +62,11 @@ namespace MyFirstARCoreApp
             GLES20.GlBufferData(GLES20.GlArrayBuffer, mVboSize, null, GLES20.GlDynamicDraw);
             GLES20.GlBindBuffer(GLES20.GlArrayBuffer, 0);
 
-            ShaderUtil.checkGLError(TAG, "buffer alloc");
+            ShaderUtil.CheckGLError(TAG, "buffer alloc");
 
-            int vertexShader = ShaderUtil.loadGLShader(TAG, context,
+            int vertexShader = ShaderUtil.LoadGLShader(TAG, context,
                 GLES20.GlVertexShader, Resource.Raw.point_cloud_vertex);
-            int passthroughShader = ShaderUtil.loadGLShader(TAG, context,
+            int passthroughShader = ShaderUtil.LoadGLShader(TAG, context,
                 GLES20.GlFragmentShader, Resource.Raw.passthrough_fragment);
 
             mProgramName = GLES20.GlCreateProgram();
@@ -75,7 +75,7 @@ namespace MyFirstARCoreApp
             GLES20.GlLinkProgram(mProgramName);
             GLES20.GlUseProgram(mProgramName);
 
-            ShaderUtil.checkGLError(TAG, "program");
+            ShaderUtil.CheckGLError(TAG, "program");
 
             mPositionAttribute = GLES20.GlGetAttribLocation(mProgramName, "a_Position");
             mColorUniform = GLES20.GlGetUniformLocation(mProgramName, "u_Color");
@@ -83,14 +83,14 @@ namespace MyFirstARCoreApp
                 mProgramName, "u_ModelViewProjection");
             mPointSizeUniform = GLES20.GlGetUniformLocation(mProgramName, "u_PointSize");
 
-            ShaderUtil.checkGLError(TAG, "program  params");
+            ShaderUtil.CheckGLError(TAG, "program  params");
         }
 
         /**
          * Updates the OpenGL buffer contents to the provided point.  Repeated calls with the same
          * point cloud will be ignored.
          */
-        public void update(PointCloud cloud)
+        public void Update(PointCloud cloud)
         {
             if (mLastPointCloud == cloud)
             {
@@ -98,7 +98,7 @@ namespace MyFirstARCoreApp
                 return;
             }
 
-            ShaderUtil.checkGLError(TAG, "before update");
+            ShaderUtil.CheckGLError(TAG, "before update");
 
             GLES20.GlBindBuffer(GLES20.GlArrayBuffer, mVbo);
             mLastPointCloud = cloud;
@@ -117,7 +117,7 @@ namespace MyFirstARCoreApp
                 mLastPointCloud.Points);
             GLES20.GlBindBuffer(GLES20.GlArrayBuffer, 0);
 
-            ShaderUtil.checkGLError(TAG, "after update");
+            ShaderUtil.CheckGLError(TAG, "after update");
         }
 
         /**
@@ -129,7 +129,7 @@ namespace MyFirstARCoreApp
          * @param cameraPerspective the camera projection matrix for this frame, typically from
          *     {@link Session#getProjectionMatrix(float[], int, float, float)}.
          */
-        public void draw(Pose pose, float[] cameraView, float[] cameraPerspective)
+        public void Draw(Pose pose, float[] cameraView, float[] cameraPerspective)
         {
             float[] modelMatrix = new float[16];
             pose.ToMatrix(modelMatrix, 0);
@@ -139,7 +139,7 @@ namespace MyFirstARCoreApp
             Matrix.MultiplyMM(modelView, 0, cameraView, 0, modelMatrix, 0);
             Matrix.MultiplyMM(modelViewProjection, 0, cameraPerspective, 0, modelView, 0);
 
-            ShaderUtil.checkGLError(TAG, "Before draw");
+            ShaderUtil.CheckGLError(TAG, "Before draw");
 
             GLES20.GlUseProgram(mProgramName);
             GLES20.GlEnableVertexAttribArray(mPositionAttribute);
@@ -154,7 +154,7 @@ namespace MyFirstARCoreApp
             GLES20.GlDisableVertexAttribArray(mPositionAttribute);
             GLES20.GlBindBuffer(GLES20.GlArrayBuffer, 0);
 
-            ShaderUtil.checkGLError(TAG, "Draw");
+            ShaderUtil.CheckGLError(TAG, "Draw");
         }
     }
 }

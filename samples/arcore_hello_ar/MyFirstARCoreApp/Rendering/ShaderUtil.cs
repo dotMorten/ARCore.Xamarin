@@ -23,9 +23,9 @@ namespace MyFirstARCoreApp
      * @param resId The resource ID of the raw text file about to be turned into a shader.
      * @return The shader object handler.
      */
-        public static int loadGLShader(string tag, Context context, int type, int resId)
+        public static int LoadGLShader(string tag, Context context, int type, int resId)
         {
-            string code = readRawTextFile(context, resId);
+            string code = ReadRawTextFile(context, resId);
             int shader = GLES20.GlCreateShader(type);
             GLES20.GlShaderSource(shader, code);
             GLES20.GlCompileShader(shader);
@@ -56,7 +56,7 @@ namespace MyFirstARCoreApp
          * @param label Label to report in case of error.
          * @throws RuntimeException If an OpenGL error is detected.
          */
-        public static void checkGLError(string tag, string label)
+        public static void CheckGLError(string tag, string label)
         {
             int error;
             while ((error = GLES20.GlGetError()) != GLES20.GlNoError)
@@ -72,7 +72,7 @@ namespace MyFirstARCoreApp
          * @param resId The resource ID of the raw text file about to be turned into a shader.
          * @return The context of the text file, or null in case of error.
          */
-        private static string readRawTextFile(Context context, int resId)
+        private static string ReadRawTextFile(Context context, int resId)
         {
             System.IO.Stream inputStream = context.Resources.OpenRawResource(resId);
             try

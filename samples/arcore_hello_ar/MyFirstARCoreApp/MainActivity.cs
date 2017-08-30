@@ -1,4 +1,5 @@
-﻿using Android.App;
+﻿using System;
+using Android.App;
 using Android.Widget;
 using Android.OS;
 using Android.Opengl;
@@ -11,11 +12,12 @@ using Android.Util;
 using Android.Support.Design.Widget;
 using System.Collections.Generic;
 using Java.Util;
+using System.Collections.Concurrent;
 
 namespace MyFirstARCoreApp
 {
     [Activity(Label = "MyFirstARCoreApp", MainLauncher = true, Theme = "@style/Theme.AppCompat.NoActionBar")]
-    public class MainActivity : Android.Support.V7.App.AppCompatActivity, GLSurfaceView.IRenderer, Android.Views.GestureDetector.IOnGestureListener, View.IOnTouchListener
+    public class MainActivity : Android.Support.V7.App.AppCompatActivity, GLSurfaceView.IRenderer, View.IOnTouchListener
     {
         const string TAG = "MainActivity";
         // Rendering. The Renderers are created here, and initialized when the GL surface is created.
@@ -28,17 +30,19 @@ namespace MyFirstARCoreApp
         private BackgroundRenderer mBackgroundRenderer = new BackgroundRenderer();
         private GestureDetector mGestureDetector;
         private Snackbar mLoadingMessageSnackbar = null;
-        
+
         private ObjectRenderer mVirtualObject = new ObjectRenderer();
         private ObjectRenderer mVirtualObjectShadow = new ObjectRenderer();
         private PlaneRenderer mPlaneRenderer = new PlaneRenderer();
         private PointCloudRenderer mPointCloud = new PointCloudRenderer();
 
-            // Temporary matrix allocated here to reduce number of allocations for each frame.
+        // Temporary matrix allocated here to reduce number of allocations for each frame.
         private readonly float[] mAnchorMatrix = new float[16];
 
         // Tap handling and UI.
-        private Queue<MotionEvent> mQueuedSingleTaps = new Queue<MotionEvent>(16);
+        ConcurrentQueue<MotionEvent> mQueuedSingleTaps = new ConcurrentQueue<MotionEvent>();
+
+        //private Queue<MotionEvent> mQueuedSingleTaps = new Queue<MotionEvent>(16);
         private List<PlaneAttachment> mTouches = new List<PlaneAttachment>();
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -62,7 +66,16 @@ namespace MyFirstARCoreApp
             }
 
             // Set up tap listener.
-            mGestureDetector = new GestureDetector(this, this);
+            mGestureDetector = new Android.Views.GestureDetector(this, new SimpleTapGestureDetector
+            {
+                SingleTapUpHandler = (MotionEvent arg) =>
+                {
+                    onSingleTap(arg);
+                    return true;
+                },
+                DownHandler = (MotionEvent arg) => true
+            });
+
             mSurfaceView.SetOnTouchListener(this);
 
             // Set up renderer.
@@ -73,32 +86,30 @@ namespace MyFirstARCoreApp
             mSurfaceView.RenderMode = Rendermode.Continuously;
 
         }
-        public bool OnSingleTapUp(MotionEvent e)
+        public bool onSingleTap(MotionEvent e)
         {
             // Queue tap if there is space. Tap is lost if queue is full.
-            if(mQueuedSingleTaps.Count < 16)
+            if (mQueuedSingleTaps.Count < 16)
                 mQueuedSingleTaps.Enqueue(e);
             return true;
         }
-
 
         protected override void OnResume()
         {
             base.OnResume();
             // ARCore requires camera permissions to operate. If we did not yet obtain runtime
             // permission on Android M and above, now is a good time to ask the user for it.
-            if (CameraPermissionHelper.hasCameraPermission(this))
+            if (CameraPermissionHelper.HasCameraPermission(this))
             {
-                showLoadingMessage();
+                ShowLoadingMessage();
                 // Note that order matters - see the note in onPause(), the reverse applies here.
                 mSession.Resume(mDefaultConfig);
                 mSurfaceView.OnResume();
             }
             else
             {
-                CameraPermissionHelper.requestCameraPermission(this);
+                CameraPermissionHelper.RequestCameraPermission(this);
             }
-
         }
 
         public void OnSurfaceCreated(IGL10 gl, Javax.Microedition.Khronos.Egl.EGLConfig config)
@@ -106,19 +117,19 @@ namespace MyFirstARCoreApp
             GLES20.GlClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
             // Create the texture and pass it to ARCore session to be filled during update().
-            mBackgroundRenderer.createOnGlThread(/*context=*/this);
+            mBackgroundRenderer.CreateOnGlThread(/*context=*/this);
             mSession.SetCameraTextureName(mBackgroundRenderer.getTextureId());
 
             // Prepare the other rendering objects.
             try
             {
-                mVirtualObject.createOnGlThread(/*context=*/this, "andy.obj", "andy.png");
-                mVirtualObject.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
+                mVirtualObject.CreateOnGlThread(/*context=*/this, "andy.obj", "andy.png");
+                mVirtualObject.SetMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
 
-                mVirtualObjectShadow.createOnGlThread(/*context=*/this,
+                mVirtualObjectShadow.CreateOnGlThread(/*context=*/this,
                     "andy_shadow.obj", "andy_shadow.png");
-                mVirtualObjectShadow.setBlendMode(ObjectRenderer.BlendMode.Shadow);
-                mVirtualObjectShadow.setMaterialProperties(1.0f, 0.0f, 0.0f, 1.0f);
+                mVirtualObjectShadow.SetBlendMode(ObjectRenderer.BlendMode.Shadow);
+                mVirtualObjectShadow.SetMaterialProperties(1.0f, 0.0f, 0.0f, 1.0f);
             }
             catch (Java.IO.IOException e)
             {
@@ -126,13 +137,13 @@ namespace MyFirstARCoreApp
             }
             try
             {
-                mPlaneRenderer.createOnGlThread(/*context=*/this, "trigrid.png");
+                mPlaneRenderer.CreateOnGlThread(/*context=*/this, "trigrid.png");
             }
             catch (Java.IO.IOException e)
             {
                 Log.Error(TAG, "Failed to read plane texture");
             }
-            mPointCloud.createOnGlThread(/*context=*/this);
+            mPointCloud.CreateOnGlThread(/*context=*/this);
         }
 
         public void OnSurfaceChanged(IGL10 gl, int width, int height)
@@ -143,8 +154,6 @@ namespace MyFirstARCoreApp
             mSession.SetDisplayGeometry(width, height);
 
         }
-
-
 
         public void OnDrawFrame(IGL10 gl)
         {
@@ -160,7 +169,8 @@ namespace MyFirstARCoreApp
 
                 // Handle taps. Handling only one tap per frame, as taps are usually low frequency
                 // compared to frame rate.
-                MotionEvent tap = mQueuedSingleTaps.Count == 0 ? null : mQueuedSingleTaps.Dequeue();
+                MotionEvent tap = null;
+                mQueuedSingleTaps.TryDequeue(out tap);
                 if (tap != null && frame.GetTrackingState() == TrackingState.Tracking)
                 {
                     foreach (HitResult hit in frame.HitTest(tap))
@@ -172,7 +182,7 @@ namespace MyFirstARCoreApp
                             // rendering system and ARCore.
                             if (mTouches.Count >= 16)
                             {
-                                mSession.RemoveAnchors(new List<Anchor>() { mTouches[0].Anchor });
+                                mSession.RemoveAnchors(new [] { mTouches[0].Anchor });
                                 mTouches.RemoveAt(0);
                             }
                             // Adding an Anchor tells ARCore that it should track this position in
@@ -190,7 +200,7 @@ namespace MyFirstARCoreApp
 
 
                 // Draw background.
-                mBackgroundRenderer.draw(frame);
+                mBackgroundRenderer.Draw(frame);
 
                 // If not tracking, don't draw 3d objects.
                 if (frame.GetTrackingState() == TrackingState.NotTracking)
@@ -210,8 +220,8 @@ namespace MyFirstARCoreApp
                 float lightIntensity = frame.LightEstimate.PixelIntensity;
 
                 // Visualize tracked points.
-                mPointCloud.update(frame.PointCloud);
-                mPointCloud.draw(frame.PointCloudPose, viewmtx, projmtx);
+                mPointCloud.Update(frame.PointCloud);
+                mPointCloud.Draw(frame.PointCloudPose, viewmtx, projmtx);
 
                 // Check if we detected at least one plane. If so, hide the loading message.
                 if (mLoadingMessageSnackbar != null)
@@ -221,20 +231,20 @@ namespace MyFirstARCoreApp
                         if (plane.GetType() == Com.Google.AR.Core.Plane.Type.HorizontalUpwardFacing &&
                                 plane.GetTrackingState() == Plane.TrackingState.Tracking)
                         {
-                            hideLoadingMessage();
+                            HideLoadingMessage();
                             break;
                         }
                     }
                 }
 
                 // Visualize planes.
-                mPlaneRenderer.drawPlanes(mSession.AllPlanes, frame.Pose, projmtx);
+                mPlaneRenderer.DrawPlanes(mSession.AllPlanes, frame.Pose, projmtx);
 
                 // Visualize anchors created by touch.
                 float scaleFactor = 1.0f;
                 foreach (PlaneAttachment planeAttachment in mTouches)
                 {
-                    if (!planeAttachment.isTracking())
+                    if (!planeAttachment.IsTracking())
                     {
                         continue;
                     }
@@ -244,12 +254,11 @@ namespace MyFirstARCoreApp
                     planeAttachment.Pose.ToMatrix(mAnchorMatrix, 0);
 
                     // Update and draw the model and its shadow.
-                    mVirtualObject.updateModelMatrix(mAnchorMatrix, scaleFactor);
-                    mVirtualObjectShadow.updateModelMatrix(mAnchorMatrix, scaleFactor);
-                    mVirtualObject.draw(viewmtx, projmtx, lightIntensity);
-                    mVirtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
+                    mVirtualObject.UpdateModelMatrix(mAnchorMatrix, scaleFactor);
+                    mVirtualObjectShadow.UpdateModelMatrix(mAnchorMatrix, scaleFactor);
+                    mVirtualObject.Draw(viewmtx, projmtx, lightIntensity);
+                    mVirtualObjectShadow.Draw(viewmtx, projmtx, lightIntensity);
                 }
-
             }
             catch (Java.Lang.Throwable t)
             {
@@ -258,54 +267,46 @@ namespace MyFirstARCoreApp
             }
         }
 
-        
-        private void showLoadingMessage()
+        private void ShowLoadingMessage()
         {
-            RunOnUiThread(() => {
+            RunOnUiThread(() =>
+            {
                 mLoadingMessageSnackbar = Snackbar.Make(//mSurfaceView.Parent as View,
                     this.FindViewById(Android.Resource.Id.Content),
                     "Searching for surfaces...", Snackbar.LengthIndefinite);
                 mLoadingMessageSnackbar.View.SetBackgroundColor(Android.Graphics.Color.Argb(0xbf, 0x32, 0x32, 0x32));
                 mLoadingMessageSnackbar.Show();
             });
-    }
+        }
 
-        private void hideLoadingMessage()
+        private void HideLoadingMessage()
         {
             RunOnUiThread(() =>
             {
-
                 mLoadingMessageSnackbar.Dismiss();
                 mLoadingMessageSnackbar = null;
             });
         }
 
-        public bool OnDown(MotionEvent e)
-        {
-            return true;
-        }
-
-        public bool OnFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
-        {
-            return false;
-        }
-
-        public void OnLongPress(MotionEvent e)
-        {
-        }
-
-        public bool OnScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY)
-        {
-            return false;
-        }
-
-        public void OnShowPress(MotionEvent e)
-        {
-        }
-
-        public bool OnTouch(View v, MotionEvent e)
+        bool View.IOnTouchListener.OnTouch(View v, MotionEvent e)
         {
             return mGestureDetector.OnTouchEvent(e);
+        }
+    }
+
+    class SimpleTapGestureDetector : GestureDetector.SimpleOnGestureListener
+    {
+        public Func<MotionEvent, bool> SingleTapUpHandler { get; set; }
+
+        public override bool OnSingleTapUp(MotionEvent e)
+        {
+            return SingleTapUpHandler?.Invoke(e) ?? false;
+        }
+        public Func<MotionEvent, bool> DownHandler { get; set; }
+
+        public override bool OnDown(MotionEvent e)
+        {
+            return DownHandler?.Invoke(e) ?? false;
         }
     }
 }

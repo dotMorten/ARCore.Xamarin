@@ -35,10 +35,7 @@ namespace MyFirstARCoreApp
         private int mTextureTarget = GLES11Ext.GlTextureExternalOes;
 
 
-        public int getTextureId()
-        {
-            return mTextureId;
-        }
+        public int TextureId => mTextureId;
 
         /**
          * Allocates and initializes OpenGL resources needed by the background renderer.  Must be
@@ -47,7 +44,7 @@ namespace MyFirstARCoreApp
          *
          * @param context Needed to access shader source.
          */
-        public void createOnGlThread(Context context)
+        public void CreateOnGlThread(Context context)
         {
             // Generate the background texture.
             int[] textures = new int[1];
@@ -83,9 +80,9 @@ namespace MyFirstARCoreApp
             bbTexCoordsTransformed.Order(ByteOrder.NativeOrder());
             mQuadTexCoordTransformed = bbTexCoordsTransformed.AsFloatBuffer();
 
-            int vertexShader = ShaderUtil.loadGLShader(TAG, context,
+            int vertexShader = ShaderUtil.LoadGLShader(TAG, context,
                     GLES20.GlVertexShader,  Resource.Raw.screenquad_vertex);
-            int fragmentShader = ShaderUtil.loadGLShader(TAG, context,
+            int fragmentShader = ShaderUtil.LoadGLShader(TAG, context,
                     GLES20.GlFragmentShader, Resource.Raw.screenquad_fragment_oes);
 
             mQuadProgram = GLES20.GlCreateProgram();
@@ -94,12 +91,12 @@ namespace MyFirstARCoreApp
             GLES20.GlLinkProgram(mQuadProgram);
             GLES20.GlUseProgram(mQuadProgram);
 
-            ShaderUtil.checkGLError(TAG, "Program creation");
+            ShaderUtil.CheckGLError(TAG, "Program creation");
 
             mQuadPositionParam = GLES20.GlGetAttribLocation(mQuadProgram, "a_Position");
             mQuadTexCoordParam = GLES20.GlGetAttribLocation(mQuadProgram, "a_TexCoord");
 
-            ShaderUtil.checkGLError(TAG, "Program parameters");
+            ShaderUtil.CheckGLError(TAG, "Program parameters");
         }
 
         /**
@@ -110,7 +107,7 @@ namespace MyFirstARCoreApp
          *
          * @param frame The last {@code Frame} returned by {@link Session#update()}.
          */
-        public void draw(Frame frame)
+        public void Draw(Frame frame)
         {
             // If display rotation changed (also includes view size change), we need to re-query the uv
             // coordinates for the screen rect, as they may have changed as well.
@@ -150,7 +147,7 @@ namespace MyFirstARCoreApp
             GLES20.GlDepthMask(true);
             GLES20.GlEnable(GLES20.GlDepthTest);
 
-            ShaderUtil.checkGLError(TAG, "Draw");
+            ShaderUtil.CheckGLError(TAG, "Draw");
         }
 
         public static readonly float[] QUAD_COORDS = new float[]{

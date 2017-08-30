@@ -27,7 +27,7 @@ namespace MyFirstARCoreApp
         /**
           * Check to see we have the necessary permissions for this app.
           */
-        public static bool hasCameraPermission(Activity activity)
+        public static bool HasCameraPermission(Activity activity)
         {
             
             return ContextCompat.CheckSelfPermission(activity, CAMERA_PERMISSION) == Permission.Granted;
@@ -36,10 +36,9 @@ namespace MyFirstARCoreApp
         /**
          * Check to see we have the necessary permissions for this app, and ask for them if we don't.
          */
-        public static void requestCameraPermission(Activity activity)
+        public static void RequestCameraPermission(Activity activity)
         {
             ActivityCompat.RequestPermissions(activity, new String[] { CAMERA_PERMISSION }, CAMERA_PERMISSION_CODE);
         }
-
     }
 }
